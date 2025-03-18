@@ -4,7 +4,6 @@ from . import views
 
 router = DefaultRouter()
 router.register(r'predictions', views.PredictionResultViewSet)
-router.register(r'market-data', views.MarketDataViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

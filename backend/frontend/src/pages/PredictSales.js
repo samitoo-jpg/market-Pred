@@ -63,8 +63,8 @@ function PredictSales() {
   };
 
   const weatherOptions = ['Sunny', 'Rainy', 'Cloudy', 'Snowy', 'Stormy'];
-  const holidayOptions = ['None', 'Christmas', 'New Year', 'Thanksgiving', 'Easter', 'Black Friday', 'Cyber Monday'];
-  const seasonalityOptions = ['Spring', 'Summer', 'Fall', 'Winter'];
+  const holidayOptions = ['yes(1)', 'false(0)'];
+  const seasonalityOptions = ['Spring', 'Summer', 'Fall', 'Winter', "Autumn"];
   const categoryOptions = ['Electronics', 'Clothing', 'Home Goods', 'Food', 'Toys', 'Sports'];
   const regionOptions = ['North', 'South', 'East', 'West', 'Central'];
 
@@ -90,20 +90,24 @@ function PredictSales() {
                   label="Store ID"
                   name="store_id"
                   value={formData.store_id}
-                  onChange={handleChange}
+                  onChange={(e) =>handleChange({ target: { name: 'store_id', value: parseInt(e.target.value) || '' } })}
                   fullWidth
-                  required                  
+                  required
+                  type = "number"                  
                 />
+                
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Product ID"
                   name="product_id"
                   value={formData.product_id}
-                  onChange={handleChange}
+                  onChange={(e) => handleChange({ target: { name: 'product_id', value: parseInt(e.target.value) || '' } })}
                   fullWidth
-                  required                  
+                  required
+                  type="number"                 
                 />
+                
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth required>

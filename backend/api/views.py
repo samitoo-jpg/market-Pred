@@ -1,45 +1,40 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import PredictionResult, MarketData
-from .serializers import PredictionResultSerializer, MarketDataSerializer, PredictionRequestSerializer
+from .models import PredictionResult
+from .serializers import PredictionResultSerializer, PredictionRequestSerializer
 import joblib
 import pandas as pd
-import numpy as np
 from datetime import datetime
-import os
-import json
 
-# Load the model and preprocessor
+# Load the model, preprocessor, and columns
 MODEL_PATH = '../models/best_model.pkl'
 PREPROCESSOR_PATH = '../models/preprocessor.pkl'
+COLUMNS_PATH = '../models/columns.pkl'
 
-def load_model():
+def load_model_and_preprocessor():
     try:
         model = joblib.load(MODEL_PATH)
         preprocessor = joblib.load(PREPROCESSOR_PATH)
-        return model, preprocessor
+        columns = joblib.load(COLUMNS_PATH)
+        return model, preprocessor, columns
     except Exception as e:
-        print(f"Error loading model or preprocessor: {e}")
-        return None, None
+        print(f"Error loading model, preprocessor, or columns: {e}")
+        return None, None, None
 
 class PredictionResultViewSet(viewsets.ModelViewSet):
     queryset = PredictionResult.objects.all()
     serializer_class = PredictionResultSerializer
-
-class MarketDataViewSet(viewsets.ModelViewSet):
-    queryset = MarketData.objects.all()
-    serializer_class = MarketDataSerializer
 
 @api_view(['POST'])
 def predict_sales(request):
     serializer = PredictionRequestSerializer(data=request.data)
     
     if serializer.is_valid():
-        model, preprocessor = load_model()
+        model, preprocessor, expected_columns = load_model_and_preprocessor()
         
-        if model is None or preprocessor is None:
-            return Response({"error": "Model or preprocessor not available"}, 
+        if model is None or preprocessor is None or expected_columns is None:
+            return Response({"error": "Model, preprocessor, or columns not available"}, 
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Prepare data for prediction
@@ -53,10 +48,7 @@ def predict_sales(request):
         input_data['DayOfWeek'] = input_data['Date'].dt.dayofweek
         
         # Drop unnecessary columns
-        if 'date' in input_data.columns:
-            input_data = input_data.drop(['date'], axis=1)
-        if 'Date' in input_data.columns:
-            input_data = input_data.drop(['Date'], axis=1)
+        input_data = input_data.drop(['date', 'Date'], axis=1)
         
         # Rename columns to match training data
         column_mapping = {
@@ -76,9 +68,20 @@ def predict_sales(request):
         }
         input_data = input_data.rename(columns=column_mapping)
         
+        # Perform one-hot encoding to match training data
+        input_data_encoded = pd.get_dummies(input_data)
+        
+        # Ensure all expected columns are present
+        for col in expected_columns:
+            if col not in input_data_encoded.columns:
+                input_data_encoded[col] = 0
+        
+        # Reorder columns to match training data
+        input_data_encoded = input_data_encoded[expected_columns]
+        
         # Make prediction
         try:
-            processed_data = preprocessor.transform(input_data)
+            processed_data = preprocessor.transform(input_data_encoded)
             prediction = model.predict(processed_data)
             
             # Save prediction to database
@@ -89,7 +92,7 @@ def predict_sales(request):
                 region=serializer.validated_data['region'],
                 date=serializer.validated_data['date'],
                 predicted_sales=float(prediction[0]),
-                actual_sales=None  # To be updated later when actual data is available
+                actual_sales=None
             )
             prediction_result.save()
             
@@ -104,26 +107,19 @@ def predict_sales(request):
 
 @api_view(['GET'])
 def get_stats(request):
-    """
-    Get overall statistics for the dashboard
-    """
     try:
-        # Get count of predictions
+        from django.db import models as django_models
         prediction_count = PredictionResult.objects.count()
-        
-        # Get average predicted sales
         avg_predicted_sales = PredictionResult.objects.all().aggregate(
-            avg_predicted=models.Avg('predicted_sales')
-        )['avg_predicted'] or 0
+            django_models.Avg('predicted_sales')
+        )['predicted_sales__avg'] or 0
         
-        # Get top categories by predicted sales
         top_categories = list(PredictionResult.objects.values('category').annotate(
-            total_sales=models.Sum('predicted_sales')
+            total_sales=django_models.Sum('predicted_sales')
         ).order_by('-total_sales')[:5])
         
-        # Get top regions by predicted sales
         top_regions = list(PredictionResult.objects.values('region').annotate(
-            total_sales=models.Sum('predicted_sales')
+            total_sales=django_models.Sum('predicted_sales')
         ).order_by('-total_sales')[:5])
         
         return Response({

@@ -1,6 +1,6 @@
 # prediction_api/management/commands/import_data.py
 from django.core.management.base import BaseCommand
-from prediction_api.models import MarketData
+from prediction_api.model import MarketData
 import pandas as pd
 import numpy as np
 from datetime import datetime
