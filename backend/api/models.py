@@ -8,6 +8,7 @@ class PredictionResult(models.Model):
     date = models.DateField()
     predicted_sales = models.FloatField()
     actual_sales = models.FloatField(null=True, blank=True)
+    seasonality = models.CharField(max_length=100, null=True, blank=True)  # Must be here
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -35,6 +36,7 @@ class MarketData(models.Model):
     
     class Meta:
         ordering = ['-date', 'store_id', 'product_id']
+
+
     
-    def __str__(self):
-        return f"Store {self.store_id}, Product {self.product_id}, Date: {self.date}"
+   

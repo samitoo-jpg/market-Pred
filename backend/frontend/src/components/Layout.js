@@ -78,8 +78,8 @@ function Layout({ children }) {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Predict Sales', icon: <ShowChartIcon />, path: '/predict' },
-    { text: 'Market Data', icon: <TableChartIcon />, path: '/market-data' },
-    { text: 'Seasonal Analysis', icon: <CalendarTodayIcon />, path: '/seasonal-analysis' },
+    { text: 'GoodsVsSeasons', icon: <TableChartIcon />, path: '/GoodsVsSeasons' },
+    // { text: 'Seasonal Analysis', icon: <CalendarTodayIcon />, path: '/seasonal-analysis' },
   ];
 
   return (

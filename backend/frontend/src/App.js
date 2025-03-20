@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import PredictSales from './pages/PredictSales';
-import MarketData from './pages/MarketData';
+import GoodsVsSeasons from './pages/GoodsVsSeasons';
 // import SeasonalAnalysis from './pages/SeasonalAnalysis';
 
 const theme = createTheme({
@@ -28,7 +28,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/predict" element={<PredictSales />} />
-            <Route path="/market-data" element={<MarketData />} />
+            <Route path="/goods-vs-seasons" element={<GoodsVsSeasons />} />
             {/* <Route path="/seasonal-analysis" element={<SeasonalAnalysis />} /> */}
           </Routes>
         </Layout>

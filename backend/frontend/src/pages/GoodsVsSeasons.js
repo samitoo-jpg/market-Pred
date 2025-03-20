@@ -32,7 +32,7 @@ function Dashboard() {
     const fetchData = async () => {
       try {
         const [statsResponse, seasonalResponse] = await Promise.all([
-          axios.get('http://localhost:8000/api/stats/'),
+          // axios.get('http://localhost:8000/api/stats/'),
           axios.get('http://localhost:8000/api/seasonal-analysis/')
         ]);
         setStats(statsResponse.data);
@@ -42,11 +42,11 @@ function Dashboard() {
           const season = item.seasonality || 'Unknown'; // Handle null seasonality
           const existing = acc.find(d => d.seasonality === season);
           if (existing) {
-            existing[item.category] = item.total_predicted_sales || 0;
+            existing[item.category] = item.total_predicted_sales || item.avg_predicted_sales || 0;
           } else {
             acc.push({
               seasonality: season,
-              [item.category]: item.total_predicted_sales || 0
+              [item.category]: item.total_predicted_sales || item.avg_predicted_sales || 0
             });
           }
           return acc;

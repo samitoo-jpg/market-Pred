@@ -92,7 +92,8 @@ def predict_sales(request):
                 region=serializer.validated_data['region'],
                 date=serializer.validated_data['date'],
                 predicted_sales=float(prediction[0]),
-                actual_sales=None
+                actual_sales=None,
+                seasonality=serializer.validated_data['seasonality']  # Save seasonality here
             )
             prediction_result.save()
             
@@ -104,6 +105,21 @@ def predict_sales(request):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def seasonal_analysis(request):
+    try:
+        from django.db import models as django_models
+        seasonal_data = PredictionResult.objects.values('category', 'seasonality').annotate(
+            total_predicted_sales=django_models.Sum('predicted_sales'),  # Changed to Sum
+            # avg_satisfaction=django_models.Avg('customer_satisfaction'),
+            # total_records=django_models.Count('id')
+        ).order_by('category', 'seasonality')
+        
+        result = list(seasonal_data)
+        return Response(result)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 def get_stats(request):
@@ -130,3 +146,5 @@ def get_stats(request):
         })
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
