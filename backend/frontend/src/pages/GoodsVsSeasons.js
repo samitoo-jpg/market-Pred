@@ -3,10 +3,7 @@ import {
   Grid, 
   Paper, 
   Typography, 
-  Card, 
-  CardContent, 
-  CardHeader,
-  CircularProgress
+  CircularProgress 
 } from '@mui/material';
 import { 
   BarChart, 
@@ -16,33 +13,24 @@ import {
   CartesianGrid, 
   Tooltip, 
   Legend, 
-  ResponsiveContainer,
-  LineChart, 
-  Line
+  ResponsiveContainer
 } from 'recharts';
 import axios from 'axios';
 
-function Dashboard() {
-  const [stats, setStats] = useState(null);
-  const [seasonalData, setSeasonalData] = useState([]);
+function GoodsVsSeasons() {
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsResponse, seasonalResponse] = await Promise.all([
-          // axios.get('http://localhost:8000/api/stats/'),
-          axios.get('http://localhost:8000/api/seasonal-analysis/')
-        ]);
-        setStats(statsResponse.data);
-
-        // Transform seasonal data: pivot to seasons as rows, categories as columns
-        const transformedSeasonal = seasonalResponse.data.reduce((acc, item) => {
-          const season = item.seasonality || 'Unknown'; // Handle null seasonality
+        const response = await axios.get('http://localhost:8000/api/seasonal-analysis/');
+        const transformedData = response.data.reduce((acc, item) => {
+          const season = item.seasonality || 'Unknown';
           const existing = acc.find(d => d.seasonality === season);
           if (existing) {
-            existing[item.category] = item.total_predicted_sales || item.avg_predicted_sales || 0;
+            existing[item.category] = (existing[item.category] || 0) + (item.total_predicted_sales || item.avg_predicted_sales || 0);
           } else {
             acc.push({
               seasonality: season,
@@ -51,12 +39,11 @@ function Dashboard() {
           }
           return acc;
         }, []);
-        console.log('Transformed Seasonal Data:', transformedSeasonal); // Debug
-        setSeasonalData(transformedSeasonal);
-        
+        console.log('Transformed Data (GoodsVsSeasons):', transformedData);
+        setData(transformedData);
         setLoading(false);
       } catch (err) {
-        setError('Failed to load dashboard data');
+        setError('Failed to load seasonal data');
         setLoading(false);
       }
     };
@@ -80,86 +67,18 @@ function Dashboard() {
     );
   }
 
-  // Extract unique categories for bars
-  const categories = [...new Set(seasonalData.map(item => Object.keys(item)).flat().filter(key => key !== 'seasonality'))];
+  const categories = [...new Set(data.map(item => Object.keys(item)).flat().filter(key => key !== 'seasonality'))];
 
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
         <Paper sx={{ p: 2, mb: 3 }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Market Analysis Dashboard
+            Goods vs Seasons Analysis
           </Typography>
           <Typography variant="body1">
-            Real-time insights into market trends, inventory levels, and sales predictions.
+            Total predicted sales of specific goods across seasons
           </Typography>
-        </Paper>
-      </Grid>
-
-      {/* Stats Cards */}
-      <Grid item xs={12} md={6} lg={3}>
-        <Card>
-          <CardHeader title="Predictions" />
-          <CardContent>
-            <Typography variant="h3">{stats?.prediction_count || 0}</Typography>
-            <Typography variant="body2" color="textSecondary">
-              Total predictions made
-            </Typography>
-          </CardContent>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={6} lg={3}>
-        <Card>
-          <CardHeader title="Avg. Predicted Sales" />
-          <CardContent>
-            <Typography variant="h3">{stats?.avg_predicted_sales?.toFixed(2) || 0}</Typography>
-            <Typography variant="body2" color="textSecondary">
-              Units per prediction
-            </Typography>
-          </CardContent>
-        </Card>
-      </Grid>
-
-      {/* Charts */}
-      <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 2, height: 400 }}>
-          <Typography variant="h6" gutterBottom>
-            Top Categories by Sales
-          </Typography>
-          <ResponsiveContainer width="100%" height="90%">
-            <BarChart
-              data={stats?.top_categories || []}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="category" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="total_sales" fill="#8884d8" name="Total Sales" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Paper>
-      </Grid>
-
-      <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 2, height: 400 }}>
-          <Typography variant="h6" gutterBottom>
-            Top Regions by Sales
-          </Typography>
-          <ResponsiveContainer width="100%" height="90%">
-            <BarChart
-              data={stats?.top_regions || []}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="region" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="total_sales" fill="#82ca9d" name="Total Sales" />
-            </BarChart>
-          </ResponsiveContainer>
         </Paper>
       </Grid>
 
@@ -170,7 +89,7 @@ function Dashboard() {
           </Typography>
           <ResponsiveContainer width="100%" height="90%">
             <BarChart
-              data={seasonalData}
+              data={data}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
@@ -194,4 +113,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default GoodsVsSeasons;

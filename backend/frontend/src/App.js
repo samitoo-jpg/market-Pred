@@ -6,7 +6,6 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import PredictSales from './pages/PredictSales';
 import GoodsVsSeasons from './pages/GoodsVsSeasons';
-// import SeasonalAnalysis from './pages/SeasonalAnalysis';
 
 const theme = createTheme({
   palette: {
@@ -29,7 +28,6 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/predict" element={<PredictSales />} />
             <Route path="/goods-vs-seasons" element={<GoodsVsSeasons />} />
-            {/* <Route path="/seasonal-analysis" element={<SeasonalAnalysis />} /> */}
           </Routes>
         </Layout>
       </Router>

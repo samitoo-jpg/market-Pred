@@ -16,9 +16,7 @@ import {
   CartesianGrid, 
   Tooltip, 
   Legend, 
-  ResponsiveContainer,
-  LineChart, 
-  Line
+  ResponsiveContainer
 } from 'recharts';
 import axios from 'axios';
 
@@ -37,21 +35,20 @@ function Dashboard() {
         ]);
         setStats(statsResponse.data);
 
-        // Transform seasonal data: pivot to seasons as rows, categories as columns
         const transformedSeasonal = seasonalResponse.data.reduce((acc, item) => {
-          const season = item.seasonality || 'Unknown'; // Handle null seasonality
+          const season = item.seasonality || 'Unknown';
           const existing = acc.find(d => d.seasonality === season);
           if (existing) {
-            existing[item.category] = item.total_predicted_sales || 0;
+            existing[item.category] = (existing[item.category] || 0) + (item.total_predicted_sales || item.avg_predicted_sales || 0);
           } else {
             acc.push({
               seasonality: season,
-              [item.category]: item.total_predicted_sales || 0
+              [item.category]: item.total_predicted_sales || item.avg_predicted_sales || 0
             });
           }
           return acc;
         }, []);
-        console.log('Transformed Seasonal Data:', transformedSeasonal); // Debug
+        console.log('Transformed Seasonal Data (Dashboard):', transformedSeasonal);
         setSeasonalData(transformedSeasonal);
         
         setLoading(false);
@@ -80,7 +77,6 @@ function Dashboard() {
     );
   }
 
-  // Extract unique categories for bars
   const categories = [...new Set(seasonalData.map(item => Object.keys(item)).flat().filter(key => key !== 'seasonality'))];
 
   return (

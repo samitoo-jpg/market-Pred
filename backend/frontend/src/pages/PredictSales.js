@@ -62,11 +62,11 @@ function PredictSales() {
     }
   };
 
-  const weatherOptions = ['Sunny', 'Rainy', 'Cloudy', 'Snowy', 'Stormy'];
+  const weatherOptions = ['Sunny', 'Rainy', 'Cloudy', 'Snowy'];
   const holidayOptions = ['yes(1)', 'false(0)'];
   const seasonalityOptions = ['Spring', 'Summer', 'Fall', 'Winter', "Autumn"];
-  const categoryOptions = ['Electronics', 'Clothing', 'Home Goods', 'Food', 'Toys', 'Sports'];
-  const regionOptions = ['North', 'South', 'East', 'West', 'Central'];
+  const categoryOptions = ['Electronics', 'Clothing', 'Toys', "Groceries", "Furniture"];
+  const regionOptions = ['North', 'South', 'East', 'West'];
 
   return (
     <Grid container spacing={3}>

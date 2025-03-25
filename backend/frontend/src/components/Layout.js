@@ -18,7 +18,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 const drawerWidth = 240;
 
@@ -78,8 +77,7 @@ function Layout({ children }) {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Predict Sales', icon: <ShowChartIcon />, path: '/predict' },
-    { text: 'GoodsVsSeasons', icon: <TableChartIcon />, path: '/GoodsVsSeasons' },
-    // { text: 'Seasonal Analysis', icon: <CalendarTodayIcon />, path: '/seasonal-analysis' },
+    { text: 'Goods vs Seasons', icon: <TableChartIcon />, path: '/goods-vs-seasons' },
   ];
 
   return (
